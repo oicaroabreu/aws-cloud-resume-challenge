@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  aws-cloud-resume-challenge
+
+   SAM Template for aws-cloud-resume-challenge
+
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+
+    Tracing: Active# You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+  Api:
+    TracingEnabled: true
+
+Parameters:
+  BucketNamePrefix:
+    Type: String
+    Default: cloud-resume-challenge
+    Description: Prefix of the bucket to be configured as static website
+Resources:
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub 'icaro-${BucketNamePrefix}'
+      WebsiteConfiguration:
+        IndexDocument: index.html
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      Tags:
+        - Key: project
+          Value: cloud-resume-challenge
+    DeletionPolicy: Delete
+
+  S3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Id: CloudResumeChallengeBucketPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join ["", ["arn:aws:s3:::", !Ref S3Bucket, /*]]
+    DeletionPolicy: Delete
