@@ -55,3 +55,11 @@ Resources:
             Action: 's3:GetObject'
             Resource: !Join ["", ["arn:aws:s3:::", !Ref S3Bucket, /*]]
     DeletionPolicy: Delete
+
+Outputs:
+  CloudResumeWebsiteURL:
+    Value: !GetAtt S3Bucket.WebsiteURL
+    Description: URL for static website hosted on Amazon S3
+  CloudResumeSecureS3BucketURL:
+    Value: !Join ["", ["https://", !GetAtt S3Bucket.DomainName]]
+    Description: Name of the Cloud Resume S3 Bucket to hold static website content
